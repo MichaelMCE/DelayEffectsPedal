@@ -6,6 +6,9 @@
 
 #define DWIDTH					TFT_WIDTH
 #define DHEIGHT					TFT_HEIGHT
+#define TUNER_FREQ_MIN			10.0f
+#define TUNER_FREQ_MAX			1500.0f
+#define TUNER_TOLERENCE			4.10f
 
 #define TOOL_Pneuma				525
 #define TOOL_Invincible			410
@@ -233,40 +236,30 @@ void sceneDelayDraw (void *opaque)
 
 void sceneTunerDraw (void *opaque)
 {
-	static float tuningSum[4];
-	static uint32_t sumCt = 0;
-	
-	
-	_ufont_t *font   = getFont(FONT_TUNER38);
+	_ufont_t *font38 = getFont(FONT_TUNER38);
 	_ufont_t *font50 = getFont(FONT_TUNER50);
 	_ufont_t *font80 = getFont(FONT_TUNER80);
 	_ufont_t *font24 = getFont(FONT_CONSOLA24);
 	ui_opaque_tuner *tuner = (ui_opaque_tuner*)opaque;
-		
-	float centScale = tuner->centRange;
+
+
+	const int graphWidth = DWIDTH - 10;
+	const float centScale = tuner->centRange;
 	float notef = tuner->note;
-	sumCt = (sumCt + 1) & 0x03;
-	tuningSum[sumCt] = notef;
-	
-	notef = 0.0f;
-	for (int i = 0; i < 4; i++)
-		notef += tuningSum[i];
-	notef /= 4.0f;
 
 	// note freq
 	int width = 0;
 	int height = 0;
 	char notesText[32];
 	sprintf(notesText, "%.1f", notef);
-	fontGetMetrics(font, (uint8_t*)notesText, &width, &height);
+	fontGetMetrics(font38, (uint8_t*)notesText, &width, &height);
 		
 	int x = (abs(surface->width - width)/2);
 	int y = 15;
-	fontPrint(font, &x, &y, (uint8_t*)notesText);
-
-	if (notef < 10.0f || notef > 1500.0f)
-		notef = 0.01f;
+	fontPrint(font38, &x, &y, (uint8_t*)notesText);
 	
+	
+	// calc surrounding notes
 	uint8_t noteNearest;
 	uint8_t octaveNearest;
 	float delta = noteFindNearest(notef, &noteNearest, &octaveNearest);
@@ -280,16 +273,14 @@ void sceneTunerDraw (void *opaque)
 	uint8_t octaveOutH = octaveNearest;
 	float freqH = noteGetHigher(&noteOutH, &octaveOutH);
 
+
+	// calc note cent off from nearest note
 	float cent = 0.0f;
 	if (delta > 0)
 		cent = ((1.0f / (freqH - freqN)) * delta) * 100.0f;
 	else if (delta < 0)
 		cent = -((1.0f / (freqL - freqN)) * delta) * 100.0f;
 
-	const int graphWidth = 230;
-	float centX = (float)(graphWidth / centScale) * cent;
-	centX += (graphWidth / 2.0f);
-	centX += (DWIDTH - graphWidth) / 2.0f;
 
 	// note labels
 	// lower note
@@ -301,19 +292,19 @@ void sceneTunerDraw (void *opaque)
 	// nearest note
 	snprintf(notesText, sizeof(notesText), "%s", noteToLabel(noteNearest));
 	fontGetMetrics(font80, (uint8_t*)notesText, &width, &height);
-	x = ((TFT_WIDTH - width) / 2) - 2;
+	x = ((DWIDTH - width) / 2) - 2;
 	y = 46;
 	fontPrint(font80, &x, &y, (uint8_t*)notesText);
 
 	// higher note
 	snprintf(notesText, sizeof(notesText), "%s", noteToLabel(noteOutH));
 	fontGetMetrics(font50, (uint8_t*)notesText, &width, &height);
-	x = (TFT_WIDTH - width) - 4;
+	x = (DWIDTH - width) - 4;
 	y = 76;
 	fontPrint(font50, &x, &y, (uint8_t*)notesText);
 	
 	// horizontal mark
-	x = (TFT_WIDTH - graphWidth) / 2;
+	x = (DWIDTH - graphWidth) / 2;
 	y = 132;
 	surfaceDrawLine(surface, x, y, x+graphWidth, y, 1);
 	
@@ -338,31 +329,36 @@ void sceneTunerDraw (void *opaque)
 
 	snprintf(notesText, sizeof(notesText), "%.0f", centScale/2.0f);
 	fontGetMetrics(font24, (uint8_t*)notesText, &width, &height);
-	x = (TFT_WIDTH - width) - 5;
+	x = (DWIDTH - width) - 5;
 	y = 132 + 6;
 	fontPrint(font24, &x, &y, (uint8_t*)notesText);
-		
+
+
 	// indicator
+	float centX = (float)(graphWidth / centScale) * cent;
+	centX += (graphWidth / 2.0f);
+	centX += (DWIDTH - graphWidth) / 2.0f;
 	x = 5;
 	y = 132;
-	if (fabsf(cent) > 7.1f)
-		surfaceDrawTriangle(surface, x+(graphWidth/2)-13, TFT_HEIGHT-2, x+(graphWidth/2)+15, TFT_HEIGHT-2, centX, y+5, 1);
+
+	if (fabsf(cent) > TUNER_TOLERENCE)
+		surfaceDrawTriangle(surface, x+(graphWidth/2)-13, DHEIGHT-2, x+(graphWidth/2)+15, DHEIGHT-2, centX, y+5, 1);
 	else
-		surfaceDrawTriangleFilled(surface, x+(graphWidth/2)-13, TFT_HEIGHT-2, x+(graphWidth/2)+15, TFT_HEIGHT-2, centX, y+5, 1);
+		surfaceDrawTriangleFilled(surface, x+(graphWidth/2)-13, DHEIGHT-2, x+(graphWidth/2)+15, DHEIGHT-2, centX, y+5, 1);
 
 	// cents
 	int xOffset = x + (graphWidth * 0.16f);
 	y = 166;
 	snprintf(notesText, sizeof(notesText), "%.0f", fabsf(cent));
-	fontPrint(font, &xOffset, &y, (uint8_t*)notesText);	
+	fontPrint(font38, &xOffset, &y, (uint8_t*)notesText);	
 
 	// octave
 	xOffset = x + (graphWidth * 0.72f);
 	y = 166;
 	snprintf(notesText, sizeof(notesText), "%i", octaveNearest);
-	fontPrint(font, &xOffset, &y, (uint8_t*)notesText);
+	fontPrint(font38, &xOffset, &y, (uint8_t*)notesText);
 	
-	fontApplySurface(font, 0, 0);
+	fontApplySurface(font38, 0, 0);
 }
 
 void sceneFlangeDraw (void *opaque)
@@ -448,8 +444,13 @@ static int tunerUpdate ()
 	ui_opaque_tuner *tuner = (ui_opaque_tuner*)uiGetOpaque(UI_PAGE_TUNER);
 	
 	int updated = tunerObj.available();
-	if (updated)
+	if (updated){
 		tuner->note = tunerObj.read();
+		if (tuner->note < TUNER_FREQ_MIN)
+			tuner->note = 0.01f;
+		else if (tuner->note > TUNER_FREQ_MAX)
+			tuner->note = TUNER_FREQ_MAX;
+	}
 	return updated;
 }
 
