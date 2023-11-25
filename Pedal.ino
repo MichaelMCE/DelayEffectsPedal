@@ -1,4 +1,8 @@
 
+/*
+UI developed offline (without Teensy) through uFont for Desktop:
+https://github.com/MichaelMCE/uFont/blob/master/examples/tuner.c
+*/
 
 #include "Pedal.h"
 #include "codec.h"
