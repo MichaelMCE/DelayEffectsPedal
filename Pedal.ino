@@ -4,6 +4,7 @@ UI developed offline (without Teensy) through uFont for Desktop:
 https://github.com/MichaelMCE/uFont/blob/master/examples/tuner.c
 */
 
+
 #include "Pedal.h"
 #include "codec.h"
 
@@ -218,23 +219,31 @@ static void sceneStartupDraw (void *opaque)
 
 void sceneDelayDraw (void *opaque)
 {
-	char timestr[8];
+	char buffer[16];
 
 	ui_opaque_delay *delay = (ui_opaque_delay*)opaque;
-	sprintf(timestr, "%i", (int)delay->period);
-	
-	_ufont_t *font = getFont(FONT_DELAY);
-
 	int width = 0;
 	int height = 0;
-	fontGetMetrics(font, (uint8_t*)timestr, &width, &height);
 		
-	int x = (abs(surface->width - width)/2) - 2;
-	int y = (abs(surface->height - height)/2) - 4;
-	fontPrint(font, &x, &y, (uint8_t*)timestr);
+	// title
+	_ufont_t *font = getFont(FONT_CONSOLA24);
+	sprintf(buffer, "Delay");
+	fontGetMetrics(font, (uint8_t*)buffer, &width, &height);
+	int x = (abs(surface->width - width) / 2) + 1;
+	int y = 16;
+	fontPrint(font, &x, &y, (uint8_t*)buffer);
+	
+	
+	// delay number
+	sprintf(buffer, "%i", (int)delay->period);
+	
+	font = getFont(FONT_DELAY);
+	fontGetMetrics(font, (uint8_t*)buffer, &width, &height);
 		
-	//x = (DWIDTH - surface->width)/2;
-	//y = (DHEIGHT - surface->height)/2;
+	x = (abs(surface->width - width)/2) - 2;
+	y = (abs(surface->height - height)/2) - 4;
+	fontPrint(font, &x, &y, (uint8_t*)buffer);
+		
 	fontApplySurface(font, 0, 0);
 }
 
@@ -280,9 +289,9 @@ void sceneTunerDraw (void *opaque)
 
 	// calc note cent off from nearest note
 	float cent = 0.0f;
-	if (delta > 0)
+	if (delta > 0.0f)
 		cent = ((1.0f / (freqH - freqN)) * delta) * 100.0f;
-	else if (delta < 0)
+	else if (delta < 0.0f)
 		cent = -((1.0f / (freqL - freqN)) * delta) * 100.0f;
 
 
@@ -341,7 +350,7 @@ void sceneTunerDraw (void *opaque)
 	// indicator
 	float centX = (float)(graphWidth / centScale) * cent;
 	centX += (graphWidth / 2.0f);
-	centX += (DWIDTH - graphWidth) / 2.0f;
+	centX += (float)(DWIDTH - graphWidth) / 2.0f;
 	x = 5;
 	y = 132;
 
