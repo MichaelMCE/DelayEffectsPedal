@@ -1,5 +1,6 @@
 
-	Bass and Guitar Delay & Tuner effects pedal to enable precise & exact signal delays, based around a Teensy 4.1 with Audio Shiled.
+	Bass and Guitar Tuner and Delay effects pedal to enable precise & exact signal delays.
+	Based around a Teensy 4.1 with Audio Shield.
 
 
 ![screenshots of Tuner](./Screenshots/tuner1.png)
