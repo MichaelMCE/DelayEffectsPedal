@@ -11,6 +11,8 @@ https://github.com/MichaelMCE/uFont/blob/master/examples/tuner.c
 
 #define DWIDTH					TFT_WIDTH
 #define DHEIGHT					TFT_HEIGHT
+
+#define TUNER_A4STANDARD		440.0f
 #define TUNER_FREQ_MIN			10.0f
 #define TUNER_FREQ_MAX			1500.0f
 #define TUNER_TOLERENCE			4.10f
@@ -779,6 +781,12 @@ static void ui_init ()
 	uiSetView(UI_PAGE_STARTUP);
 }
 
+
+static void tuner_init ()
+{
+	note_init(TUNER_A4STANDARD);
+}
+
 void setup ()
 {
 	//Serial.begin(9600);
@@ -789,7 +797,7 @@ void setup ()
 	ufont_init();
 	pins_init();
 	ui_init();
-	note_init();
+	tuner_init();
 	
 	delayStart();
 	delayDisable();

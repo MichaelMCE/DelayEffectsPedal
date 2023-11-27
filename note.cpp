@@ -7,18 +7,18 @@
 
 
 static notetable_t notetable[12] = {
- {NOTE_C,       "C ", {}},
- {NOTE_C_SHARP, "C#", {}},
- {NOTE_D,       "D ", {}},
- {NOTE_D_SHARP, "D#", {}},
- {NOTE_E,       "E ", {}},
- {NOTE_F,       "F ", {}},
- {NOTE_F_SHARP, "F#", {}},
- {NOTE_G,       "G ", {}},
- {NOTE_G_SHARP, "G#", {}},
- {NOTE_A,       "A ", {}},
- {NOTE_A_SHARP, "A#", {}},
- {NOTE_B,       "B ", {}},
+ {NOTE_C,       "C", {}},
+ {NOTE_C_SHARP, "C#",{}},
+ {NOTE_D,       "D", {}},
+ {NOTE_D_SHARP, "D#",{}},
+ {NOTE_E,       "E", {}},
+ {NOTE_F,       "F", {}},
+ {NOTE_F_SHARP, "F#",{}},
+ {NOTE_G,       "G", {}},
+ {NOTE_G_SHARP, "G#",{}},
+ {NOTE_A,       "A", {}},
+ {NOTE_A_SHARP, "A#",{}},
+ {NOTE_B,       "B", {}},
 };
 
 #if 0
@@ -162,7 +162,7 @@ static void noteBuildTable (const float A4)
 	}
 }
 
-void note_init ()
+void note_init (const float standardA4)
 {
-	noteBuildTable(NOTE_STANDARD);
+	noteBuildTable(standardA4);
 }

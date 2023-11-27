@@ -5,7 +5,7 @@
 #define _NOTE_H_
 
 
-#define NOTE_STANDARD			440.0f
+
 #define NOTE_OCTAVES			6		// number of octaves covered
 
 
@@ -31,7 +31,7 @@ typedef struct {
 }notetable_t;
 
 
-void note_init ();
+void note_init (const float standardA4);
 
 float noteFindNearest (float freqIn, uint8_t *noteOut, uint8_t *octaveOut);
 
