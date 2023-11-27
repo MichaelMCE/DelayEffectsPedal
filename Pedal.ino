@@ -364,7 +364,7 @@ void sceneTunerDraw (void *opaque)
 	// cents
 	int xOffset = x + (graphWidth * 0.16f);
 	y = 166;
-	snprintf(notesText, sizeof(notesText), "%.0f", fabsf(cent));
+	snprintf(notesText, sizeof(notesText), "%i", (int)cent);
 	fontPrint(font38, &xOffset, &y, (uint8_t*)notesText);	
 
 	// octave
