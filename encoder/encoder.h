@@ -71,6 +71,8 @@
 
 
 
+typedef void (*encCb_t) (const int value);
+
 // All the data needed by interrupts is consolidated into this ugly struct
 // to facilitate assembly language optimizing of the speed critical update.
 // The assembly code uses auto-incrementing addressing modes, so the struct
@@ -82,14 +84,15 @@ typedef struct {
 	IO_REG_TYPE            pin2_bitmask;
 	uint8_t                state;
 	int32_t                position;
+	encCb_t                func;
 } Encoder_internal_state_t;
 
-void encUpdate (int val);
+
 
 class Encoder
 {
 public:
-	Encoder(uint8_t pin1, uint8_t pin2) {
+	Encoder (uint8_t pin1, uint8_t pin2, encCb_t func){
 		#ifdef INPUT_PULLUP
 		pinMode(pin1, INPUT_PULLUP);
 		pinMode(pin2, INPUT_PULLUP);
@@ -104,6 +107,8 @@ public:
 		encoder.pin2_register = PIN_TO_BASEREG(pin2);
 		encoder.pin2_bitmask = PIN_TO_BITMASK(pin2);
 		encoder.position = 0;
+		encoder.func = func;
+		
 		// allow time for a passive R-C filter to charge
 		// through the pullup resistors, before reading
 		// the initial state
@@ -339,7 +344,7 @@ public:
 				break;
 		}
 #endif
-		encUpdate(arg->position);
+		arg->func(arg->position);
 	}
 private:
 /*

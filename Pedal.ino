@@ -41,7 +41,9 @@ static int32_t sceneUpdateRequested;
 static uint32_t uiPage = UI_PAGE_STARTUP;
 static const ui_page_t *uiPages;
 
-static Encoder myEnc(ENCODER_PIN_CLK, ENCODER_PIN_DT);
+void encUpdate (const int value);
+
+static Encoder myEnc(ENCODER_PIN_CLK, ENCODER_PIN_DT, encUpdate);
 static volatile int encPosNew = 0;
 static volatile int encSwChange = 0;
 static int encPos = -1;
