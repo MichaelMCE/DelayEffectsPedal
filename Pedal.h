@@ -126,5 +126,14 @@ void *uiGetOpaque (const int pageId);
 int uiEventCB (const int eventId, void *opaque, uint32_t data1uint32, int32_t data2Int32, float data3Flt);
 
 
+typedef struct {
+	Encoder *enc;
+	volatile int posNew;
+	volatile int swChange;
+	int pos;
+}dial_t;
+
+
+
 #endif
 

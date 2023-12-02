@@ -41,20 +41,12 @@ static int32_t sceneUpdateRequested;
 static uint32_t uiPage = UI_PAGE_STARTUP;
 static const ui_page_t *uiPages;
 
-void encUpdate (const int value);
-
-static Encoder myEnc(ENCODER_PIN_CLK, ENCODER_PIN_DT, encUpdate);
-static volatile int encPosNew = 0;
-static volatile int encSwChange = 0;
-static int encPos = -1;
-
+static dial_t dial1;
 
 
 
 void dumpStats ()
 {
-
-		
 	printf("\r\n");
 	printf("delay: %.2f %.2f\r\n", delayObj.processorUsage(), delayObj.processorUsageMax());
 	printf("tuner: %.2f %.2f\r\n", tunerObj.processorUsage(), tunerObj.processorUsageMax());
@@ -136,7 +128,7 @@ static void delayEncChange (const int direction)
 
 static void encReset ()
 {
-	encPosNew = 0;
+	dial1.posNew = 0;
 }
 
 static void ufont_init ()
@@ -174,12 +166,12 @@ static void audio_init ()
 		delayObj.disable(i);
 }
 
-void encUpdate (const int value)
+void enc1Update (const int value)
 {
 	if (!(value&0x03)){
-		if (value != encPos){
-			encPosNew = encPos - value;
-			encPos = value;
+		if (value != dial1.pos){
+			dial1.posNew = dial1.pos - value;
+			dial1.pos = value;
 		}
 	}
 }
@@ -191,7 +183,7 @@ static void encSwCB ()
 	int currentPressTime = millis();
 	if (currentPressTime - lastPressTime > 400){
 		lastPressTime = currentPressTime;
-		encSwChange = 1;
+		dial1.swChange = 1;
 	}
 }
 
@@ -201,6 +193,14 @@ static void pins_init ()
 	
 	pinMode(ENCODER_PIN_SW, INPUT_PULLUP);
 	attachInterrupt(ENCODER_PIN_SW, encSwCB, FALLING);
+}
+
+static void dials_init ()
+{
+	dial1.pos = -1;
+	dial1.posNew = 0;
+	dial1.swChange = 0;
+	dial1.enc = new Encoder(ENCODER_PIN_CLK, ENCODER_PIN_DT, enc1Update);
 }
 
 static void sceneStartupDraw (void *opaque)
@@ -798,9 +798,10 @@ void setup ()
 	audio_init();
 	ufont_init();
 	pins_init();
+	dials_init();
 	ui_init();
 	tuner_init();
-	
+		
 	delayStart();
 	delayDisable();
 	
@@ -822,16 +823,16 @@ void setup ()
 
 void loop ()
 {
-	if (encPosNew){
-		if (uiDispatchMessage(UI_EVENT_ROTARY, 0, IN_ROTARY_1, encPosNew))
+	if (dial1.posNew){
+		if (uiDispatchMessage(UI_EVENT_ROTARY, 0, IN_ROTARY_1, dial1.posNew))
 			sceneUpdate();
 		encReset();
 	}
 
-	if (encSwChange){
-		if (uiDispatchMessage(UI_EVENT_BUTTON, 0, IN_SWITCH_1, encSwChange))
+	if (dial1.swChange){
+		if (uiDispatchMessage(UI_EVENT_BUTTON, 0, IN_SWITCH_1, dial1.swChange))
 			sceneUpdate();
-		encSwChange = 0;
+		dial1.swChange = 0;
 	}
 	
 	if (uiDispatchMessage(UI_EVENT_TICK, 0, 0, 0.0f))
