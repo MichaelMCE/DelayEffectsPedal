@@ -119,9 +119,9 @@ static inline void *uf_realloc (void *ptr, size_t size/*, const uint8_t *func*/)
 {
 	
 #if (USE_EXTMEM_ALLOC)
-	return extmem_malloc(size);
+	return extmem_realloc(ptr, size);
 #else
-	return malloc(size);
+	return realloc(ptr, size);
 #endif
 }
 
